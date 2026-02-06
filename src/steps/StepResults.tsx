@@ -77,6 +77,9 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
     return len > 8 ? Math.floor(len / 6) : 0;
   }, [calculation]);
 
+  const monthCount = calculation?.monthly.length ?? 0;
+  const turnoverChartHeight = monthCount <= 2 ? 200 : 260;
+
   const filtersSummary = useMemo(() => {
     const products = filters.products;
     const productLabel = products.length
@@ -429,42 +432,80 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
             </div>
             <div className="rounded-lg border border-border bg-card p-4">
               <p className="mb-3 text-sm font-semibold">Average turnover by month</p>
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={calculation.monthly}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
-                  <XAxis
-                    dataKey="month"
-                    interval={monthTickInterval}
-                    angle={-35}
-                    height={60}
-                    textAnchor="end"
-                    axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
-                    tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
-                    tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
-                  />
-                  <YAxis
-                    axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
-                    tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
-                    tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--popover))',
-                      borderColor: 'hsl(var(--border))',
-                      borderRadius: 12
-                    }}
-                    labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
-                    itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="averageTurnover"
-                    stroke="hsl(var(--chart-turnover))"
-                    strokeWidth={3}
-                    dot={{ r: 2, stroke: 'hsl(var(--chart-turnover))', fill: 'hsl(var(--chart-turnover))' }}
-                    activeDot={{ r: 4, stroke: 'hsl(var(--chart-turnover))', fill: 'hsl(var(--chart-turnover))' }}
-                  />
-                </LineChart>
+              <ResponsiveContainer width="100%" height={turnoverChartHeight}>
+                {monthCount <= 2 ? (
+                  <BarChart data={calculation.monthly}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+                    <XAxis
+                      dataKey="month"
+                      interval={monthTickInterval}
+                      angle={-35}
+                      height={60}
+                      textAnchor="end"
+                      axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                      tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                      tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
+                    />
+                    <YAxis
+                      axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                      tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                      tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--popover))',
+                        borderColor: 'hsl(var(--border))',
+                        borderRadius: 12
+                      }}
+                      labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                    />
+                    <Bar
+                      dataKey="averageTurnover"
+                      name="Avg turnover (days)"
+                      fill="hsl(var(--chart-turnover))"
+                      stroke="hsl(var(--chart-turnover))"
+                      fillOpacity={0.6}
+                      radius={[6, 6, 0, 0]}
+                    />
+                  </BarChart>
+                ) : (
+                  <LineChart data={calculation.monthly}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+                    <XAxis
+                      dataKey="month"
+                      interval={monthTickInterval}
+                      angle={-35}
+                      height={60}
+                      textAnchor="end"
+                      axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                      tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                      tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
+                    />
+                    <YAxis
+                      axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                      tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                      tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--popover))',
+                        borderColor: 'hsl(var(--border))',
+                        borderRadius: 12
+                      }}
+                      labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                      itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="averageTurnover"
+                      stroke="hsl(var(--chart-turnover))"
+                      strokeWidth={3}
+                      dot={{ r: 2, stroke: 'hsl(var(--chart-turnover))', fill: 'hsl(var(--chart-turnover))' }}
+                      activeDot={{ r: 4, stroke: 'hsl(var(--chart-turnover))', fill: 'hsl(var(--chart-turnover))' }}
+                    />
+                  </LineChart>
+                )}
               </ResponsiveContainer>
             </div>
           </div>
