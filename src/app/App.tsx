@@ -171,6 +171,19 @@ export default function App() {
 
   useEffect(() => {
     if (!availableMonths.length) return;
+
+    // Default to the last two months unless the user has already selected a range.
+    // This keeps the results view readable by default.
+    if (!filters.monthRange[0] && !filters.monthRange[1]) {
+      const end = availableMonths[availableMonths.length - 1] ?? null;
+      const start = availableMonths[Math.max(0, availableMonths.length - 2)] ?? null;
+      setFilters((prev) => ({
+        ...prev,
+        monthRange: [start, end]
+      }));
+      return;
+    }
+
     const clampMonth = (value: string | null) => {
       if (!value) return null;
       if (availableMonths.includes(value)) return value;

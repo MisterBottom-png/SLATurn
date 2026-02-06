@@ -21,7 +21,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -68,6 +67,12 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
   const mismatchRows = useMemo(() => {
     if (!calculation) return [];
     return calculation.rows.filter((row) => row.mismatchType);
+  }, [calculation]);
+
+  const monthTickInterval = useMemo(() => {
+    const len = calculation?.monthly.length ?? 0;
+    // Recharts interval is "show every N+1 tick". Keep ~6-8 ticks.
+    return len > 8 ? Math.floor(len / 6) : 0;
   }, [calculation]);
 
   const filtersSummary = useMemo(() => {
@@ -311,65 +316,106 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-lg border border-border bg-card p-4">
-              <p className="mb-3 text-sm font-semibold">On-time vs late by month (Excel vs calculated)</p>
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={calculation.monthly}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
-                  <XAxis
-                    dataKey="month"
-                    axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
-                    tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
-                    tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
-                  />
-                  <YAxis
-                    axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
-                    tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
-                    tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--popover))',
-                      borderColor: 'hsl(var(--border))',
-                      borderRadius: 12
-                    }}
-                    labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
-                    itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
-                  />
-                  <Legend
-                    formatter={(value) => <span style={{ color: 'hsl(var(--muted-foreground))' }}>{value}</span>}
-                  />
-                  <Bar
-                    dataKey="onTime"
-                    name="On-time (Excel)"
-                    fill="hsl(var(--chart-ontime-fill))"
-                    stroke="hsl(var(--chart-ontime))"
-                    fillOpacity={0.7}
-                  />
-                  <Bar
-                    dataKey="late"
-                    name="Late (Excel)"
-                    fill="hsl(var(--chart-late-fill))"
-                    stroke="hsl(var(--chart-late))"
-                    fillOpacity={0.7}
-                  />
-                  <Bar
-                    dataKey="onTimeCalculated"
-                    name="On-time (Calculated)"
-                    fill="hsl(var(--chart-ontime-fill))"
-                    stroke="hsl(var(--chart-ontime))"
-                    fillOpacity={0.35}
-                    strokeDasharray="4 2"
-                  />
-                  <Bar
-                    dataKey="lateCalculated"
-                    name="Late (Calculated)"
-                    fill="hsl(var(--chart-late-fill))"
-                    stroke="hsl(var(--chart-late))"
-                    fillOpacity={0.35}
-                    strokeDasharray="4 2"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <p className="mb-3 text-sm font-semibold">On-time vs late by month</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">Excel required date</p>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={calculation.monthly}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+                      <XAxis
+                        dataKey="month"
+                        interval={monthTickInterval}
+                        angle={-35}
+                        height={60}
+                        textAnchor="end"
+                        axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                        tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                        tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
+                      />
+                      <YAxis
+                        axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                        tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                        tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--popover))',
+                          borderColor: 'hsl(var(--border))',
+                          borderRadius: 12
+                        }}
+                        labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                        itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                      />
+                      <Bar
+                        dataKey="onTime"
+                        name="On-time"
+                        stackId="a"
+                        fill="hsl(var(--chart-ontime-fill))"
+                        stroke="hsl(var(--chart-ontime))"
+                        fillOpacity={0.75}
+                      />
+                      <Bar
+                        dataKey="late"
+                        name="Late"
+                        stackId="a"
+                        fill="hsl(var(--chart-late-fill))"
+                        stroke="hsl(var(--chart-late))"
+                        fillOpacity={0.75}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">Calculated SLA</p>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart data={calculation.monthly}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+                      <XAxis
+                        dataKey="month"
+                        interval={monthTickInterval}
+                        angle={-35}
+                        height={60}
+                        textAnchor="end"
+                        axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                        tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                        tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
+                      />
+                      <YAxis
+                        axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                        tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
+                        tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--popover))',
+                          borderColor: 'hsl(var(--border))',
+                          borderRadius: 12
+                        }}
+                        labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                        itemStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                      />
+                      <Bar
+                        dataKey="onTimeCalculated"
+                        name="On-time"
+                        stackId="a"
+                        fill="hsl(var(--chart-ontime-fill))"
+                        stroke="hsl(var(--chart-ontime))"
+                        fillOpacity={0.55}
+                      />
+                      <Bar
+                        dataKey="lateCalculated"
+                        name="Late"
+                        stackId="a"
+                        fill="hsl(var(--chart-late-fill))"
+                        stroke="hsl(var(--chart-late))"
+                        fillOpacity={0.55}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
             <div className="rounded-lg border border-border bg-card p-4">
               <p className="mb-3 text-sm font-semibold">Average turnover by month</p>
@@ -378,6 +424,10 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
                   <XAxis
                     dataKey="month"
+                    interval={monthTickInterval}
+                    angle={-35}
+                    height={60}
+                    textAnchor="end"
                     axisLine={{ stroke: 'hsl(var(--chart-grid))' }}
                     tickLine={{ stroke: 'hsl(var(--chart-grid))' }}
                     tick={{ fill: 'hsl(var(--chart-axis))', fontSize: 12 }}
