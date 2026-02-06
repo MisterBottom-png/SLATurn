@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Warm neutral palette
+  - Parchment:    #edede9
+  - Dust Grey:    #d6ccc2
+  - Linen:        #f5ebe0
+  - Powder Petal: #e3d5ca
+  - Almond Silk:  #d5bdaf
+*/
+:root {
+  --background: 216 12% 84%;
+  --foreground: 215 14% 34%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 215 14% 34%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 14% 34%;
+
+  --primary: 196 100% 33%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 216 12% 84%;
+  --secondary-foreground: 215 14% 34%;
+
+  --muted: 216 12% 84%;
+  --muted-foreground: 215 14% 34%;
+
+  --accent: 216 12% 84%;
+  --accent-foreground: 215 14% 34%;
+
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 216 12% 84%;
+  --input: 216 12% 84%;
+  --ring: 215 100% 34%;
+
+  --radius: 0.9rem;
+
+  /* Charts */
+  --chart-ontime: 221 83% 53%;
+  --chart-ontime-fill: 214 95% 83%;
+  --chart-late: 215 16% 47%;
+  --chart-late-fill: 214 32% 91%;
+  --chart-turnover: 221 83% 53%;
+  --chart-grid: 214 32% 91%;
+  --chart-axis: 215 25% 27%;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+*:focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
