@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { exportResultsToPdf } from '@/exports/pdf';
-import PdfReport from '@/exports/PdfReport';
 import MonthlyTable from '@/results/MonthlyTable';
 import RowTable from '@/results/RowTable';
 import ExcludedRowTable from '@/results/ExcludedRowTable';
@@ -42,7 +41,6 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
   const [copyFallback, setCopyFallback] = useState('');
   const [copyFeedback, setCopyFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
-  const pdfReportRef = useRef<HTMLDivElement | null>(null);
 
   const kpis = useMemo(() => {
     if (!calculation) return null;
@@ -170,11 +168,13 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
   };
 
   const handleExportPdf = async () => {
-    if (pdfReportRef.current) {
-      await exportResultsToPdf(pdfReportRef.current, {
+    // Export exactly what is rendered in the Summary tab.
+    // This keeps the PDF charts/layout identical to the app (no separate PDF-only layout).
+    if (resultsRef.current) {
+      await exportResultsToPdf(resultsRef.current, {
         filenamePrefix: 'SLA_turnover_report',
         orientation: 'l',
-        chartsRenderDelayMs: 400
+        chartsRenderDelayMs: 500
       });
     }
   };
@@ -184,12 +184,7 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <div
-        ref={pdfReportRef}
-        className="fixed -left-[99999px] top-0 w-[1200px] bg-white p-6 text-black"
-      >
-        <PdfReport calculation={calculation} filters={filters} />
-      </div>
+      {/* PDF export is generated from the on-screen Summary content (resultsRef). */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <TabsList>
           <TabsTrigger value="summary">Summary</TabsTrigger>
@@ -430,7 +425,7 @@ export default function StepResults({ calculation, filters }: StepResultsProps) 
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-border bg-card p-4">
+            <div className="rounded-lg border border-border bg-card p-4" data-pdf-avoid-break="true">
               <p className="mb-3 text-sm font-semibold">Average turnover by month</p>
               <ResponsiveContainer width="100%" height={turnoverChartHeight}>
                 {monthCount <= 2 ? (
