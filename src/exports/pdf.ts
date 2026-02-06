@@ -3,9 +3,18 @@ import jsPDF from 'jspdf';
 
 const BACKGROUND_COLOR = '#ffffff';
 
-const waitForCharts = async () => {
+export interface PdfExportOptions {
+  /** Default: "SampleKPI_results" */
+  filenamePrefix?: string;
+  /** Default: landscape ("l") to keep tables readable. */
+  orientation?: 'p' | 'l';
+  /** Default: 250. Increase if charts are still blank in the export. */
+  chartsRenderDelayMs?: number;
+}
+
+const waitForCharts = async (delayMs: number) => {
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-  await new Promise((resolve) => setTimeout(resolve, 250));
+  await new Promise((resolve) => setTimeout(resolve, delayMs));
 };
 
 const formatTimestamp = (date: Date) => {
@@ -39,17 +48,32 @@ const sliceCanvas = (canvas: HTMLCanvasElement, pageHeightPx: number) => {
   return slices;
 };
 
-export const exportResultsToPdf = async (element: HTMLElement) => {
-  await waitForCharts();
+export const exportResultsToPdf = async (element: HTMLElement, options: PdfExportOptions = {}) => {
+  const {
+    filenamePrefix = 'SampleKPI_results',
+    orientation = 'l',
+    chartsRenderDelayMs = 250
+  } = options;
+
+  await waitForCharts(chartsRenderDelayMs);
+
+  const captureWidth = Math.max(element.scrollWidth, element.offsetWidth);
+  const captureHeight = Math.max(element.scrollHeight, element.offsetHeight);
 
   const canvas = await html2canvas(element, {
     backgroundColor: BACKGROUND_COLOR,
     scale: Math.min(window.devicePixelRatio || 1, 2),
-    useCORS: true
+    useCORS: true,
+    width: captureWidth,
+    height: captureHeight,
+    windowWidth: captureWidth,
+    windowHeight: captureHeight,
+    scrollX: -window.scrollX,
+    scrollY: -window.scrollY
   });
 
   const pdf = new jsPDF({
-    orientation: 'p',
+    orientation,
     unit: 'pt',
     format: 'a4'
   });
@@ -68,6 +92,6 @@ export const exportResultsToPdf = async (element: HTMLElement) => {
     pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, imgHeight);
   });
 
-  const filename = `SampleKPI_results_${formatTimestamp(new Date())}.pdf`;
+  const filename = `${filenamePrefix}_${formatTimestamp(new Date())}.pdf`;
   pdf.save(filename);
 };
